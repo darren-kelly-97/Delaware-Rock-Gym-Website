@@ -1,0 +1,352 @@
+@import "tailwindcss";
+
+/*
+  Delaware Rock Gym design tokens (v2).
+  Accent: cobalt #2446F0 (light) / #3A58FF (dark). One accent, cool ink neutrals, square corners throughout.
+  Theme: light by default; a toggle sets html[data-theme="dark"|"light"] and is remembered per visitor.
+  Signature texture: the t-nut bolt grid of a climbing wall (.wall-grid).
+
+  Z-index scale (only these values are used):
+    --z-nav:  40  sticky header
+    --z-menu: 50  dropdown and mobile menu panels
+*/
+
+:root {
+  --bg: #f4f6fb;
+  --surface: #fcfcfe;
+  --surface-2: #e9edf7;
+  --text: #0d1226;
+  --muted: #4a5270;
+  --line: #d6dcea;
+  --brand: #2446f0;
+  --brand-hover: #1a36d4;
+  --brand-ink: #fcfcfe;
+  --link: #1f3bd6;
+  --brand-soft: #e4e9ff;
+  --dot: rgb(36 70 240 / 0.16);
+  --scrim: rgb(7 11 24 / 0.55);
+  --on-media: #f4f6fb;
+  --ok: #138a4a;
+  --z-nav: 40;
+  --z-menu: 50;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #070b18;
+  --surface: #0e1428;
+  --surface-2: #151c35;
+  --text: #eef1fa;
+  --muted: #a6aec8;
+  --line: #222a47;
+  --brand: #3a58ff;
+  --brand-hover: #2a47f2;
+  --brand-ink: #fcfcfe;
+  --link: #9aabff;
+  --brand-soft: #121c46;
+  --dot: rgb(154 171 255 / 0.13);
+  --scrim: rgb(7 11 24 / 0.62);
+  --ok: #3ccf7c;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-soft: var(--brand-soft);
+  --color-link: var(--link);
+  --color-notice: var(--brand-soft);
+  --color-on-media: var(--on-media);
+  --color-ok: var(--ok);
+  --font-sans: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-archivo), "Arial Narrow", ui-sans-serif, sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  h1,
+  h2 {
+    font-family: var(--font-display);
+    font-stretch: 75%;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -0.005em;
+    line-height: 0.95;
+    text-wrap: balance;
+  }
+  h3 {
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  [id] {
+    scroll-margin-top: 6rem;
+  }
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 3px;
+  }
+  ::selection {
+    background: var(--brand);
+    color: var(--brand-ink);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Load-in: hero lines rise into place (hierarchy: headline first, then support). Visible at rest. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.35em);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise {
+  animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+/* Headline lines slide without fading, so they count as painted immediately (LCP). */
+@keyframes slide-up {
+  from {
+    transform: translateY(0.3em);
+  }
+  to {
+    transform: none;
+  }
+}
+.slide-up {
+  animation: slide-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Scroll reveal: CSS scroll-driven, progressive enhancement, content visible without it. */
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: reveal-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 35%;
+    }
+    /* Hero photos drift at two speeds over the first screen of scroll. */
+    .drift-slow,
+    .drift-fast {
+      animation: drift linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 100vh;
+    }
+    .drift-slow {
+      --drift: -40px;
+    }
+    .drift-fast {
+      --drift: -110px;
+    }
+    /* The route line on "Your first visit" fills as you scroll through it. */
+    .route-fill {
+      transform-origin: top;
+      animation: route linear both;
+      animation-timeline: view();
+      animation-range: entry 20% cover 60%;
+    }
+  }
+}
+@keyframes drift {
+  to {
+    transform: translateY(var(--drift));
+  }
+}
+@keyframes route {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* Marquee: one per page, pauses on hover, static under reduced motion. */
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-track {
+  animation: marquee 38s linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+    width: auto;
+    padding-inline: 1rem;
+  }
+  .marquee-track > div {
+    flex-wrap: wrap;
+    row-gap: 0.75rem;
+  }
+  .marquee-track > div + div {
+    display: none;
+  }
+}
+
+@layer components {
+  .container-site {
+    width: 100%;
+    max-width: 80rem;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 768px) {
+    .container-site {
+      padding-inline: 2rem;
+    }
+  }
+
+  .display {
+    font-family: var(--font-display);
+    font-stretch: 75%;
+    font-weight: 800;
+    text-transform: uppercase;
+    line-height: 0.92;
+  }
+
+  /* Climbing-wall t-nut grid. */
+  .wall-grid {
+    background-image: radial-gradient(var(--dot) 1.6px, transparent 1.8px);
+    background-size: 26px 26px;
+    background-position: 13px 13px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 3rem;
+    padding: 0.7rem 1.35rem;
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    border: 1.5px solid transparent;
+    transition:
+      background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+      color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .btn:active {
+    transform: translateY(1px) scale(0.98);
+  }
+  .btn-primary {
+    background: var(--brand);
+    color: var(--brand-ink);
+    box-shadow: 0 10px 24px -12px rgb(36 70 240 / 0.7);
+  }
+  .btn-primary:hover {
+    background: var(--brand-hover);
+    box-shadow: 0 14px 30px -12px rgb(36 70 240 / 0.8);
+  }
+  .btn-secondary {
+    border-color: var(--text);
+    color: var(--text);
+  }
+  .btn-secondary:hover {
+    background: var(--text);
+    color: var(--bg);
+  }
+  .btn-on-media {
+    border-color: var(--on-media);
+    color: var(--on-media);
+  }
+  .btn-on-media:hover {
+    background: var(--on-media);
+    color: #0d1226;
+  }
+  .btn-sm {
+    min-height: 2.5rem;
+    padding: 0.5rem 0.95rem;
+    font-size: 0.9375rem;
+  }
+
+  .link {
+    color: var(--link);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+  .link:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  .prose-site {
+    max-width: 65ch;
+  }
+  .prose-site > * + * {
+    margin-top: 1rem;
+  }
+  .prose-site h2 {
+    font-size: clamp(1.75rem, 1.3rem + 1.6vw, 2.6rem);
+    margin-top: 3.25rem;
+  }
+  .prose-site h3 {
+    font-size: 1.25rem;
+    font-weight: 650;
+    margin-top: 2rem;
+  }
+  .prose-site ul {
+    list-style: disc;
+    padding-left: 1.25rem;
+  }
+  .prose-site a:not(.btn) {
+    color: var(--link);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
